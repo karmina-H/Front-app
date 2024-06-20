@@ -1,11 +1,19 @@
 import React from 'react';
-import { View, Text, Button } from 'react-native';
-import { StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
-const ResultScreen = () => {
+const ResultScreen = ( props) => {
+  const { likeFoods, dislikeFoods } = props;
+
   return (
     <View style={styles.container}>
-      <Text>Home Screen</Text>
+      <Text style={styles.header}>Liked Foods</Text>
+      {likeFoods.map((food, index) => (
+        <Text key={index} style={styles.foodItem}>{food}</Text>
+      ))}
+      <Text style={styles.header}>Disliked Foods</Text>
+      {dislikeFoods.map((food, index) => (
+        <Text key={index} style={styles.foodItem}>{food}</Text>
+      ))}
     </View>
   );
 };
@@ -16,8 +24,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  header: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginVertical: 10,
+  },
+  foodItem: {
+    fontSize: 16,
+    marginVertical: 5,
+  },
 });
-
-
 
 export default ResultScreen;
