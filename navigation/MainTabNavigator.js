@@ -15,8 +15,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 const Tab = createBottomTabNavigator();
 
 const MainTabNavigator = () => {
-    const [dislikeFoods, setDislikeFoods] = useState([]);
-    const [likeFoods, setLikeFoods] = useState([]);
+
 
     return (
         <Tab.Navigator
@@ -60,10 +59,6 @@ const MainTabNavigator = () => {
                 {props => (
                     <HomeScreen
                         {...props}
-                        setDislikeFoods={setDislikeFoods}
-                        setLikeFoods={setLikeFoods}
-                        dislikeFoods={dislikeFoods}
-                        likeFoods={likeFoods}
                     />
                 )}
             </Tab.Screen>
