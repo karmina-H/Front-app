@@ -1,18 +1,24 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import MainTabNavigator from './navigation/MainTabNavigator';
-import ProfileScreen from './screens/ProfileScreen';
-import HomeScreen from './screens/HomeScreen';
 import { PaperProvider } from 'react-native-paper';
+import { createStackNavigator } from '@react-navigation/stack';
 
+import HomeScreen from './screens/HomeScreen';
+import LikeListScreen from './screens/LikeListScreen';
+import { LikeFoodsProvider } from './context/LikeFoodsContext';
+const Stack = createStackNavigator();
 
 export default function App() {
   return (
-  <PaperProvider>
-      <NavigationContainer>
-        <HomeScreen />
-      </NavigationContainer>
-   </PaperProvider>
+    <LikeFoodsProvider>
+      <PaperProvider>
+        <NavigationContainer>
+          <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="LikeList" component={LikeListScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </PaperProvider>
+    </LikeFoodsProvider>
   );
 }
