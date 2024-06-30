@@ -3,7 +3,7 @@ import { View, Text, Image, StyleSheet, Dimensions, Alert } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
-import { Button } from 'react-native-paper';
+import { Button, Badge } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { LikeFoodsContext } from '../context/LikeFoodsContext';
 
@@ -159,8 +159,14 @@ const HomeScreen = () => {
     const handleSwiped = (cardIndex, direction) => { //카드를 스와이프 했을때 실행되는 함수
         if (direction === 'right') {
             setLikeFoods(prev => [...prev, data[cardIndex]]);
+            setTimeout(() => { 
+                setSwipeDirection(false);
+            }, 400);
         } else if (direction === 'left') {
             setDislikeFoods(prev => [...prev, data[cardIndex]]);
+            setTimeout(() => { 
+                setSwipeDirection(false);
+            }, 400);
         }
         setCurrentIndex(prevIndex => prevIndex + 1);
     };
@@ -289,6 +295,7 @@ const HomeScreen = () => {
                 <View>
                     <Button mode="elevated" onPress={handleLikeList}>
                         <Text style={styles.topbuttontext}>좋아요목록</Text>
+                        {likeFoods.length!==0 && <Badge>{likeFoods.length}</Badge>}
                     </Button>
                 </View>
             </View>
