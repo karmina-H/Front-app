@@ -24,89 +24,67 @@ const HomeScreen = () => {
 
     const [feedbackindex, setFeedbackIndex] = useState(0); //피드백 인덱스 지금 몇번째로 서버에서 랜더중인지 
 
-    const fetchData = async () => {
-        try {
-            console.log("FEEdbackindex!:", feedbackindex)
-            setCurrentIndex(0);
-            const response = await fetch('http://192.168.0.6:5000/data');
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const data = await response.json();
-            setData(data);
-            for (let i = 0; i < data.length; i++) {
-                console.log(data[i].name);
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            Alert.alert('Error', 'Failed to fetch data. Please check your network and server.');
-        }
-    };
 
-    const sendDataToServer = async (index) => {
-        console.log('likeFoods:', likeFoods.length);
-        // console.log('dislikeFoods:', dislikeFoods.length);
-        // if (likeFoods.length === 0 && dislikeFoods.length === 0) {
-        //     console.log('No data to send');
-        //     fetchData();
-        //     setCurrentIndex(0);
-        // }
-        // else{
-            console.log('Sending2');
-            try {
-                let ip = '';
-                console.log(index)
-                if(index === 1){
-                    ip = 'http://192.168.0.6:5000/recommendation1'
-    
-                }else if(index === 2){
-                    ip = 'http://192.168.0.6:5000/recommendation2'
-                }else if(index >= 3){
-                    ip = 'http://192.168.0.6:5000/recommendation3'
-                }
-                console.log(ip)
-                const response = await fetch(ip, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        likeFoods: likeFoods,
-                        dislikeFoods: dislikeFoods,
-                    }),
-                });
-    
-                // for (let i = 0; i < likeFoods.length; i++) {
-                //     console.log(likeFoods[i].name);
-                // }
-                // for (let i = 0; i < dislikeFoods.length; i++) {
-                //     console.log(dislikeFoods[i].name);
-                // }
-    
-                if (!response.ok) {
-                    throw new Error('Failed to send data to server');
-                }
-    
-                const result = await response.json();
-                Alert.alert('Success', 'Data successfully sent to server');
-    
-                for (let i = 0; i < result.length; i++) {
-                    console.log(result[i].name);
-                }
-                setData(result);
-                setCurrentIndex(0);
-    
-            } catch (error) {
-                console.error('Error sending data:', error);
-                Alert.alert('Error', 'Failed to send data to server');
-            }
-
+    const sendDataToServer = async (index) => { //인덱스가 0일경우 무작위 데이터 가져옴\
+        try{
+            if ((likeFoods.length === 0 && dislikeFoods.length === 0) || index === 0) {
+                    console.log('fetch_data');
+                    setCurrentIndex(0);
+                    const response = await fetch('http://192.168.0.6:5000/data');
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const data = await response.json();
+                    setData(data);
+            }else{
+                console.log('Sending2');
+                    let ip = '';
+                    console.log(index)
+                    if(index === 1){
+                        ip = 'http://192.168.0.6:5000/recommendation1'
         
+                    }else if(index === 2){
+                        ip = 'http://192.168.0.6:5000/recommendation2'
+                    }else if(index >= 3){
+                        ip = 'http://192.168.0.6:5000/recommendation3'
+                    }
+                    console.log(ip)
+                    const response = await fetch(ip, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            likeFoods: likeFoods,
+                            dislikeFoods: dislikeFoods,
+                        }),
+                    });
+        
+        
+                    if (!response.ok) {
+                        throw new Error('Failed to send data to server');
+                    }
+        
+                    const result = await response.json();
+                    Alert.alert('Success', 'Data successfully sent to server');
+        
+                    for (let i = 0; i < result.length; i++) {
+                        console.log(result[i].name);
+                    }
+                    setData(result);
+                    setCurrentIndex(0);
+                }
+
+        } catch (error) {
+            console.error('Error sending data:', error);
+            Alert.alert('Error', 'Failed to send data to server');
+        }
+
     };
     
 
     useEffect(() => { //시작할때 데이터 받아옴
-        fetchData();
+        sendDataToServer(0);
     }, []);
 
 
@@ -117,8 +95,8 @@ const HomeScreen = () => {
         if (currentIndex === 5) {
             setCurrentIndex(0);
             if(likeFoods.length == 0){
-                console.log('fetch_data');
-                await fetchData();
+                // console.log('fetch_data');
+                await sendDataToServer(0);
                 setFeedbackIndex(0);
                 setStackcount(3);
             }else{
@@ -145,9 +123,6 @@ const HomeScreen = () => {
     console.log('currentIndex1:', currentIndex);
 
     }, [currentIndex]);
-
-
-
 
 
     const handleSwiped = (cardIndex, direction) => {
@@ -192,7 +167,7 @@ const HomeScreen = () => {
                 {
                     text: '예',
                     onPress: async() => {
-                        await fetchData(); // fetchData가 완료될 때까지 기다립니다.
+                        await sendDataToServer(0); // fetchData가 완료될 때까지 기다립니다.
                         setCurrentIndex(0);
                         setLikeFoods([]);
                         setDislikeFoods([]);
@@ -219,7 +194,7 @@ const HomeScreen = () => {
                 {
                     text: '예',
                     onPress: async() => {
-                        await fetchData(); // fetchData가 완료될 때까지 기다립니다.
+                        await sendDataToServer(0); 
                         setCurrentIndex(0);
                         setLikeFoods([]);
                         setDislikeFoods([]);
