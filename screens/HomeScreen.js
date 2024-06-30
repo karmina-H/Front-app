@@ -22,10 +22,12 @@ const HomeScreen = () => {
     const [swiperKey, setSwiperKey] = useState(0); //siwper를 재 랜더링하기 위한 key
     const [stackcount, setStackcount] = useState(3); //스택카운트
 
-    const [feedbackindex, setFeedbackIndex] = useState(0); //피드백 인덱스 지금 몇번째로 서버에서 랜더중인지
+    const [feedbackindex, setFeedbackIndex] = useState(0); //피드백 인덱스 지금 몇번째로 서버에서 랜더중인지 
 
     const fetchData = async () => {
         try {
+            console.log("FEEdbackindex!:", feedbackindex)
+            setCurrentIndex(0);
             const response = await fetch('http://192.168.0.6:5000/data');
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -44,12 +46,12 @@ const HomeScreen = () => {
     const sendDataToServer = async (index) => {
         console.log('likeFoods:', likeFoods.length);
         // console.log('dislikeFoods:', dislikeFoods.length);
-        if (likeFoods.length === 0 && dislikeFoods.length === 0) {
-            console.log('No data to send');
-            fetchData();
-            setCurrentIndex(0);
-        }
-        else{
+        // if (likeFoods.length === 0 && dislikeFoods.length === 0) {
+        //     console.log('No data to send');
+        //     fetchData();
+        //     setCurrentIndex(0);
+        // }
+        // else{
             console.log('Sending2');
             try {
                 let ip = '';
@@ -99,7 +101,7 @@ const HomeScreen = () => {
                 Alert.alert('Error', 'Failed to send data to server');
             }
 
-        }
+        
     };
     
 
@@ -110,22 +112,42 @@ const HomeScreen = () => {
 
 
     useEffect(() => { //현재 인덱스가 변경될때 마다 실행되는데 현재 인덱스가 5가 되면 추천메뉴 받아옴
+        const tempfunc = async () => {
+
         if (currentIndex === 5) {
-            console.log('currentIndex:', currentIndex);
-            sendDataToServer(feedbackindex + 1);
-            setFeedbackIndex(feedbackindex + 1);
-            setStackcount(3)
+            setCurrentIndex(0);
+            if(likeFoods.length == 0){
+                console.log('fetch_data');
+                await fetchData();
+                setFeedbackIndex(0);
+                setStackcount(3);
+            }else{
+                console.log('send_data');
+                await sendDataToServer(feedbackindex + 1);
+                setFeedbackIndex(prevIndex => prevIndex + 1);
+                setStackcount(3)
+            }
         }else if(currentIndex === 4){
-            console.log('currentIndex:', currentIndex);
             setStackcount(1)
         }else if(currentIndex === 3){
-            console.log('currentIndex:', currentIndex);
             setStackcount(2)
         }else{
-            console.log('currentIndex:', currentIndex);
             setStackcount(3)
         }
+
+        if(dontKnowPressed && (currentIndex !== 5)){
+            setSwiperKey(swiperKey + 1);
+        }
+
+        
+    }
+    tempfunc();
+    console.log('currentIndex1:', currentIndex);
+
     }, [currentIndex]);
+
+
+
 
 
     const handleSwiped = (cardIndex, direction) => {
@@ -142,42 +164,16 @@ const HomeScreen = () => {
             setSwipeDirection(x > 0 ? 'right' : 'left');
         }
     };
+        
 
-    const handleDontknow = (cardIndex) => {
-
+    const handleDontknow = () => {
         setDontKnowPressed(true);
+        
         setTimeout(() => {
             setDontKnowPressed(false);
         }, 500);
-        console.log('currentIndex1:', currentIndex);
+        setDontknowFoods(prev => [...prev, data[currentIndex]]);
         setCurrentIndex(prevIndex => prevIndex + 1);
-        setDontknowFoods(prev => [...prev, data[cardIndex]]);
-
-        console.log('currentIndex2:', currentIndex);
-
-        if (currentIndex === 5) {
-            // console.log('currentIndex:', currentIndex);
-            sendDataToServer(feedbackindex + 1); //ueseffect로 선언한 currentindex변화감지가 실행 안되어서 여기서 직접실행함.
-            setFeedbackIndex(feedbackindex + 1);
-            setStackcount(3)
-            setSwiperKey(swiperKey - 5);
-        }else if(currentIndex <= 4){
-            // console.log('currentIndex:', currentIndex);
-            setStackcount(1)
-            setSwiperKey(swiperKey - 5);
-        }
-        else if(currentIndex === 3){
-            // console.log('currentIndex:', currentIndex);
-            setStackcount(2)
-            setSwiperKey(swiperKey - 5);
-        }else{
-            // console.log('currentIndex:', currentIndex);
-            setStackcount(3)
-            setSwiperKey(swiperKey - 5);
-        }
-        // setSwiperKey(swiperKey - 5);
-        // console.log('dontknow', cardIndex);
-
 
     }
 
@@ -323,7 +319,7 @@ const HomeScreen = () => {
                 <Button mode="contained" onPress={() => handleSelect(currentIndex)} style={styles.likelistbutton}>
                     <Text>이거선택!</Text>
                 </Button>
-                <Button mode="text" onPress={() => handleDontknow(currentIndex)} style={styles.dontknowbutton}>
+                <Button mode="text" onPress={() => handleDontknow()} style={styles.dontknowbutton}>
                     <Text>잘 모르겠어요</Text>
                 </Button>
             </View>
