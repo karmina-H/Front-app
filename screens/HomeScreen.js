@@ -22,25 +22,47 @@ const HomeScreen = () => {
     const swiperRef = useRef(null); //swiper 레퍼런스
     const navigation = useNavigation();
     const [swiperKey, setSwiperKey] = useState(0); //siwper를 재 랜더링하기 위한 key
-    const [stackcount, setStackcount] = useState(3); //스택카운트
 
     const [feedbackindex, setFeedbackIndex] = useState(0); //피드백 인덱스 지금 몇번째로 서버에서 랜더중인지 
 
     const[cardview, setCardview] = useState(true); //카드뷰
 
+    const fetch_first_data = useCallback(async () => { //처음 데이터 가져오는 함수
+        try{
+                let url = `${API_BASE_URL}/data`;
+                const response = await fetch(url);
+                if (!response.ok) { 
+                    throw new Error('Network response was not ok');
+                }
+                const result = await response.json();
+                setData(result[0]); // 첫 번째 요소가 메뉴 데이터
+                for (let i = 0; i < result[0].length; i++) { // 받은 데이터 확인용 콘솔로그
+                    console.log("받은데이터1",result[0][i].name);
+                }
+                const response2 = await fetch(url);
+                if (!response2.ok) { 
+                    throw new Error('Network response was not ok');
+                }
+                const result2 = await response2.json();
+                setData(prevData => ([...prevData, ...result2[0]])); // 첫 번째 요소가 메뉴 데이터
+                for (let i = 0; i < result2[0].length; i++) { // 받은 데이터 확인용 콘솔로그
+                    console.log("받은데이터2",result2[0][i].name);
+                }
+            
+        } catch (error) {
+            console.error('Error sending data:', error);
+            Alert.alert('Error', 'Failed to send data to server');
+        }
 
- 
+    }, );
 
 
-    const fetch_data = useCallback(async (index) => { //성능 최적화를 위해 useCallback 사용
+
+    const fetch_data = useCallback(async (index, first_index) => { //성능 최적화를 위해 useCallback 사용
         try{
             let data_len = 0;
-            console.log('index:', index);
+            let remainingFoods=[];
             if (index === 0) { //인덱스가 0일경우 무작위 데이터 가져옴
-                    console.log('fecth1');
-                    if(currentIndex !== 0){
-                        setCurrentIndex(0);
-                    }
                     setFeedbackIndex(0);
                     let url = `${API_BASE_URL}/data`;
                     const response = await fetch(url);
@@ -48,10 +70,19 @@ const HomeScreen = () => {
                         throw new Error('Network response was not ok');
                     }
                     const result = await response.json();
-                    setData(result[0]) // 첫 번째 요소가 메뉴 데이터
+                    setData(prevData => {
+                        if (first_index === 0) {
+                          remainingFoods = prevData.slice(5, 10);
+                          return [...result[0], ...remainingFoods];
+                        } else if (first_index === 5) {
+                          remainingFoods = prevData.slice(0, 5);
+                          return [...remainingFoods, ...result[0]];
+                        }
+                        console.log('remainingFoods:', remainingFoods);
+                      });
+                     // 첫 번째 요소가 메뉴 데이터
                     data_len = result[1]; // 두 번째 요소가 데이터 길이
             }else{ //인덱스가 1,2,3일경우 각각 피드백된 데이터 3개,4개,5개 가져옴
-                console.log('fecth2');
                     let url = `${API_BASE_URL}/recommendation${Math.min(index, 3)}`; //피드백된 데이터 가져오는 url
                     const response = await fetch(url, {
                         method: 'POST',
@@ -68,13 +99,21 @@ const HomeScreen = () => {
                         throw new Error('Network response was not ok');
                     }
                     const result = await response.json();
-                    setData(result[0]) // 첫 번째 요소가 메뉴 데이터
+                    setData(prevData => {
+                        if (first_index === 0) {
+                          remainingFoods = prevData.slice(5, 10); // 기존 데이터의 일부를 유지
+                          return [...result, ...remainingFoods];
+                        } else if (first_index === 5) {
+                          remainingFoods = prevData.slice(0, 5); // 기존 데이터의 일부를 유지
+                          return [...remainingFoods, ...result];
+                        }
+                        console.log('remainingFoods:', remainingFoods);
+                      });
                     data_len = result[1]; // 두 번째 요소가 데이터 길이
                     Alert.alert('Success', 'Data successfully sent to server');
-                    setCurrentIndex(0);
+                    // setCurrentIndex(0);
             }
-            console.log('data_len:', data_len);
-            if(data_len == 0){
+            if(data_len == 0 && currentIndex%5 == 0){
                 Alert.alert(
                     '더이상 추천할 음식이 없습니다. 처음부터 다시 시작하시겠습니까?',
                     'Would you like to start over?',
@@ -87,7 +126,7 @@ const HomeScreen = () => {
                         {
                             text: '예',
                             onPress: async() => {
-                                await fetch_data(0); // fetchData가 완료될 때까지 기다립니다.
+                                await fetch_first_data(); // fetchData가 완료될 때까지 기다립니다.
                                 setCurrentIndex(0);
                                 setLikeFoods([]);
                                 setDislikeFoods([]);
@@ -106,19 +145,19 @@ const HomeScreen = () => {
             Alert.alert('Error', 'Failed to send data to server');
         }
 
-    }, []);
+    }, [likeFoods, dislikeFoods]);
 
     useEffect(() => { // 데이터가 변경될 때마다 로그 출력
         if (data.length > 0) {
-            for (let i = 0; i < Math.min(data.length, 5); i++) { // 받은 데이터 확인용 콘솔로그
+            for (let i = 0; i < data.length; i++) { // 받은 데이터 확인용 콘솔로그
                 console.log(data[i].name);
             }
         }
     }, [data]);
     
 
-    useEffect(() => { //컴포넌트가 처음 렌더링 될때 무작위 데이터 가져오는 함수
-        fetch_data(0);
+    useEffect(() => { //컴포넌트가 처음 렌더링 될때 무작위 데이터 가져오는 함수 실행
+        fetch_first_data();
     }, []);
  
 
@@ -126,22 +165,22 @@ const HomeScreen = () => {
         const tempfunc = async () => {
 
         if (currentIndex === 5) {
-            setCurrentIndex(0);
-            if(likeFoods.length == 0){ //만약 좋아요 리스트가 비어있으면(삭제한경우가 있을 수 있으니까) 처음부터 다시시작
-                await fetch_data(0);
+            if(likeFoods.length === 0){ //만약 좋아요 리스트가 비어있으면(삭제한경우가 있을 수 있으니까) 처음부터 다시시작
+                await fetch_data(0,0);
                 setFeedbackIndex(0);
-                setStackcount(3); //5번째 카드일때 그다음 카드가 랜더링 된 뒤에 3개만 보이게
             }else{
-                await fetch_data(feedbackindex + 1);
+                await fetch_data(feedbackindex + 1,0);
                 setFeedbackIndex(prevIndex => prevIndex + 1);
-                setStackcount(3) //5번째 카드일때 그다음 카드가 랜더링 된 뒤에 3개만 보이게
             }
-        }else if(currentIndex === 4){
-            setStackcount(1) //4번째 카드일때 뒤에 1개만 보이게
-        }else if(currentIndex === 3){
-            setStackcount(2)//3번째 카드일때 뒤에 2개만 보이게
-        }else{
-            setStackcount(3)//나머지는 3개 보이게
+        }else if(currentIndex === 10){ 
+            setCurrentIndex(0); 
+            if(likeFoods.length === 0){ //만약 좋아요 리스트가 비어있으면(삭제한경우가 있을 수 있으니까) 처음부터 다시시작
+                await fetch_data(0,5);
+                setFeedbackIndex(0);
+            }else{
+                await fetch_data(feedbackindex + 1,5);
+                setFeedbackIndex(prevIndex => prevIndex + 1);
+            }
         }
 
         if(dontKnowPressed && (currentIndex !== 5)){ //잘 모르겠어요 버튼 눌렀을때 카드 컴포넌트가 다시 렌더링 되게
@@ -157,6 +196,7 @@ const HomeScreen = () => {
 
 
     const handleSwiped = (cardIndex, direction) => { //카드를 스와이프 했을때 실행되는 함수
+        console.log("cardIndex:", cardIndex);
         if (direction === 'right') {
             setLikeFoods(prev => [...prev, data[cardIndex]]);
             setTimeout(() => { 
@@ -176,6 +216,7 @@ const HomeScreen = () => {
             setSwipeDirection(x > 0 ? 'right' : 'left');
         }
     };
+
         
 
     const handleDontknow = () => { //잘 모르겠어요 버튼 눌렀을때 실행되는 함수
@@ -204,7 +245,7 @@ const HomeScreen = () => {
                 {
                     text: '예',
                     onPress: async() => { //예를 눌렀을때 모든것이 초기화 되고 다시 처음부터 시작
-                        await fetch_data(0); // fetchData가 완료될 때까지 기다립니다.
+                        fetch_first_data();
                         setCurrentIndex(0);
                         setLikeFoods([]);
                         setDislikeFoods([]);
@@ -231,7 +272,7 @@ const HomeScreen = () => {
                 {
                     text: '예',
                     onPress: async() => { //예를 눌렀을때 모든것이 초기화 되고 다시 처음부터 시작
-                        await fetch_data(0);
+                        fetch_first_data();
                         setCardview(true); 
                         setCurrentIndex(0);
                         setLikeFoods([]);
@@ -300,7 +341,7 @@ const HomeScreen = () => {
                 </View>
             </View>
             <View style={styles.swiperContainer}>
-            {cardview&&<Swiper
+            {cardview == true ? <Swiper
                     ref={swiperRef}
                     key={swiperKey}
                     cards={data}
@@ -315,11 +356,11 @@ const HomeScreen = () => {
                     onSwiping={(x, y) => handleSwiping(x, y)}
                     backgroundColor={'transparent'}
                     showSecondCard={true}
-                    stackSize={stackcount}
+                    stackSize={3}
                     onSwipedAborted={() => setSwipeDirection(null)}
                     verticalSwipe={false}
                     infinite
-                />}
+                /> : <View><Text>더이상 추천할 음식이 없습니다.</Text></View>}
                 {renderIcon()}
             </View>
             <View style={styles.bottom_text}>
