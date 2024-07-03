@@ -95,9 +95,9 @@ const LikeListScreen = ({ navigation }) => {
                     </View>
                 </Modal>
             )}
-            <Button icon="map-marker" mode="contained" onPress={() => navigation_to.navigate('MapApi')} style={styles.locationStyle}>
+            {likeFoods.length>0 &&<Button icon="map-marker" mode="contained" onPress={() => navigation_to.navigate('MapApi')} style={styles.locationStyle}>
                     위치찾기
-            </Button>
+            </Button>}
         </View>
 
     );
