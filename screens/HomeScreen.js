@@ -36,18 +36,18 @@ const HomeScreen = () => {
                 }
                 const result = await response.json();
                 setData(result[0]); // 첫 번째 요소가 메뉴 데이터
-                for (let i = 0; i < result[0].length; i++) { // 받은 데이터 확인용 콘솔로그
-                    console.log("받은데이터1",result[0][i].name);
-                }
+                // for (let i = 0; i < result[0].length; i++) { // 받은 데이터 확인용 콘솔로그
+                //     console.log("받은데이터1",result[0][i].name);
+                // }
                 const response2 = await fetch(url);
                 if (!response2.ok) { 
                     throw new Error('Network response was not ok');
                 }
                 const result2 = await response2.json();
                 setData(prevData => ([...prevData, ...result2[0]])); // 첫 번째 요소가 메뉴 데이터
-                for (let i = 0; i < result2[0].length; i++) { // 받은 데이터 확인용 콘솔로그
-                    console.log("받은데이터2",result2[0][i].name);
-                }
+                // for (let i = 0; i < result2[0].length; i++) { // 받은 데이터 확인용 콘솔로그
+                //     console.log("받은데이터2",result2[0][i].name);
+                // }
             
         } catch (error) {
             console.error('Error sending data:', error);
@@ -62,7 +62,9 @@ const HomeScreen = () => {
         try{
             let data_len = 0;
             let remainingFoods=[];
+
             if (index === 0) { //인덱스가 0일경우 무작위 데이터 가져옴
+                    console.log("무작위로 가져옴");
                     setFeedbackIndex(0);
                     let url = `${API_BASE_URL}/data`;
                     const response = await fetch(url);
@@ -76,14 +78,19 @@ const HomeScreen = () => {
                           return [...result[0], ...remainingFoods];
                         } else if (first_index === 5) {
                           remainingFoods = prevData.slice(0, 5);
-                          return [...remainingFoods, ...result[0]];
+                          return [...remainingFoods, result[0]];
                         }
                         console.log('remainingFoods:', remainingFoods);
                       });
                      // 첫 번째 요소가 메뉴 데이터
                     data_len = result[1]; // 두 번째 요소가 데이터 길이
             }else{ //인덱스가 1,2,3일경우 각각 피드백된 데이터 3개,4개,5개 가져옴
+                console.log("피드백으로 가져옴");
                     let url = `${API_BASE_URL}/recommendation${Math.min(index, 3)}`; //피드백된 데이터 가져오는 url
+                    for(let i=0; i<likeFoods.length; i++){ //보낼 데이터 확인
+                        console.log("(보낼데이터)likeFoods:",likeFoods[i].name);
+                    }
+
                     const response = await fetch(url, {
                         method: 'POST',
                         headers: {
@@ -99,13 +106,16 @@ const HomeScreen = () => {
                         throw new Error('Network response was not ok');
                     }
                     const result = await response.json();
+                    for (let i = 0; i < result[0].length; i++) { // 받은 데이터 확인용 콘솔로그
+                        console.log("받은데이터",result[0][i].name);
+                    }
                     setData(prevData => {
                         if (first_index === 0) {
                           remainingFoods = prevData.slice(5, 10); // 기존 데이터의 일부를 유지
-                          return [...result, ...remainingFoods];
+                          return [...result[0], ...remainingFoods];
                         } else if (first_index === 5) {
                           remainingFoods = prevData.slice(0, 5); // 기존 데이터의 일부를 유지
-                          return [...remainingFoods, ...result];
+                          return [...remainingFoods, ...result[0]];
                         }
                         console.log('remainingFoods:', remainingFoods);
                       });
@@ -169,7 +179,7 @@ const HomeScreen = () => {
                 await fetch_data(0,0);
                 setFeedbackIndex(0);
             }else{
-                await fetch_data(feedbackindex + 1,0);
+                await fetch_data(feedbackindex+1,0);
                 setFeedbackIndex(prevIndex => prevIndex + 1);
             }
         }else if(currentIndex === 10){ 
@@ -178,7 +188,7 @@ const HomeScreen = () => {
                 await fetch_data(0,5);
                 setFeedbackIndex(0);
             }else{
-                await fetch_data(feedbackindex + 1,5);
+                await fetch_data(feedbackindex+1,5);
                 setFeedbackIndex(prevIndex => prevIndex + 1);
             }
         }
