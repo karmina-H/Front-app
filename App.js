@@ -6,6 +6,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from './screens/HomeScreen';
 import LikeListScreen from './screens/LikeListScreen';
 import { LikeFoodsProvider } from './context/LikeFoodsContext';
+import MapapiScreen from './screens/MapapiScreen';
 const Stack = createStackNavigator();
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
           <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="LikeList" component={LikeListScreen} />
+            <Stack.Screen name="MapApi" component={MapapiScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </PaperProvider>

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, Dimensions, Modal, TouchableOpacity, Ale
 import { Button } from 'react-native-paper';
 import { FlatGrid } from 'react-native-super-grid';
 import { LikeFoodsContext } from '../context/LikeFoodsContext';
+import { useNavigation } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -10,6 +11,9 @@ const LikeListScreen = ({ navigation }) => {
     const { likeFoods, setLikeFoods } = useContext(LikeFoodsContext);
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
+    const [fabbutton, setFabbutton] = useState(false);
+
+    const navigation_to = useNavigation();
 
     const openModal = (image) => {
         setSelectedImage(image);
@@ -91,9 +95,15 @@ const LikeListScreen = ({ navigation }) => {
                     </View>
                 </Modal>
             )}
+            <Button icon="map-marker" mode="contained" onPress={() => navigation_to.navigate('MapApi')} style={styles.locationStyle}>
+                    위치찾기
+            </Button>
         </View>
+
     );
 };
+
+// const fabStyle = { [animateFrom]: 16 };
 
 const styles = StyleSheet.create({
     container: {
@@ -170,6 +180,17 @@ const styles = StyleSheet.create({
         height: width,
         borderRadius: width / 2,
     },
+
+    locationStyle: {
+        bottom: 16,
+        right: 16,
+        position: 'absolute',
+        justifyContent: 'center',
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+   
+      },
 });
 
 export default LikeListScreen;
