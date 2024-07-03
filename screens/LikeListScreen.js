@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, StyleSheet, Image, Dimensions, Modal, TouchableOpacity, Alert } from 'react-native';
-import { Button, TouchableRipple } from 'react-native-paper';
+import { Button } from 'react-native-paper';
 import { FlatGrid } from 'react-native-super-grid';
 import { LikeFoodsContext } from '../context/LikeFoodsContext';
 
@@ -21,7 +21,7 @@ const LikeListScreen = ({ navigation }) => {
         setSelectedImage(null);
     };
 
-    const deleteItem = (id) => {
+    const deleteItem = (name) => {
         Alert.alert(
             "삭제 확인",
             "정말로 이 항목을 삭제하시겠습니까?",
@@ -33,8 +33,7 @@ const LikeListScreen = ({ navigation }) => {
                 {
                     text: "삭제",
                     onPress: () => {
-                        setLikeFoods(prevFoods => prevFoods.filter(item => item.id !== id));
-                        console.log(likeFoods[0]);
+                        setLikeFoods(prevFoods => prevFoods.filter(item => item.name !== name));
                     },
                     style: "destructive"
                 }
@@ -60,12 +59,12 @@ const LikeListScreen = ({ navigation }) => {
                     data={likeFoods}
                     style={styles.gridView}
                     spacing={10}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item) => item.name} // 아이템의 이름을 키로 사용
                     renderItem={({ item }) => (
                         <TouchableOpacity 
-                            key={item.id} // key prop 추가
+                            key={item.name} // 키로 이름 사용
                             onPress={() => openModal(`http://192.168.0.6:5000/${item.image}`)}
-                            onLongPress={() => deleteItem(item.id)}
+                            onLongPress={() => deleteItem(item.name)}
                             rippleColor="rgba(0, 0, 0, .32)"
                             style={styles.touchable}
                         >
@@ -73,11 +72,10 @@ const LikeListScreen = ({ navigation }) => {
                                 <Image source={{ uri: `http://192.168.0.6:5000/${item.image}` }} style={styles.image} />
                                 <Text style={styles.text}>{item.name}</Text>
                             </View>
-                        </TouchableOpacity >
+                        </TouchableOpacity>
                     )}
                 /> : <View><Text>좋아요한 항목이 없습니다.</Text></View>
-                
-                    }
+                }
             </View>
 
             {selectedImage && (
@@ -103,7 +101,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         width: width,
     },
-    
     touchable: {
         borderRadius: 10,
     },
@@ -115,7 +112,6 @@ const styles = StyleSheet.create({
         fontSize: 24,
         marginBottom: 10,
         fontWeight: 'bold',
-
     },
     Topbutton: {
         flex: 1,

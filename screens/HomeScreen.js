@@ -29,6 +29,8 @@ const HomeScreen = () => {
 
     const fetch_first_data = useCallback(async () => { //처음 데이터 가져오는 함수
         try{
+
+                setData([]); 
                 let url = `${API_BASE_URL}/data`;
                 const response = await fetch(url);
                 if (!response.ok) { 
@@ -255,8 +257,9 @@ const HomeScreen = () => {
                 {
                     text: '예',
                     onPress: async() => { //예를 눌렀을때 모든것이 초기화 되고 다시 처음부터 시작
-                        fetch_first_data();
                         setCurrentIndex(0);
+                        console.log('선택됨');
+                        fetch_first_data();
                         setLikeFoods([]);
                         setDislikeFoods([]);
                         setDontknowFoods([]);
@@ -282,9 +285,10 @@ const HomeScreen = () => {
                 {
                     text: '예',
                     onPress: async() => { //예를 눌렀을때 모든것이 초기화 되고 다시 처음부터 시작
+                        console.log('초기화됨');
+                        setCurrentIndex(0);
                         fetch_first_data();
                         setCardview(true); 
-                        setCurrentIndex(0);
                         setLikeFoods([]);
                         setDislikeFoods([]);
                         setDontknowFoods([]);
