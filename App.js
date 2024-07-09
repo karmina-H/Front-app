@@ -7,6 +7,7 @@ import HomeScreen from './screens/HomeScreen';
 import LikeListScreen from './screens/LikeListScreen';
 import { LikeFoodsProvider } from './context/LikeFoodsContext';
 import MapapiScreen from './screens/MapapiScreen';
+import FamouseListScreen from './screens/FamouseListScreen';
 const Stack = createStackNavigator();
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="LikeList" component={LikeListScreen} />
             <Stack.Screen name="MapApi" component={MapapiScreen} />
+            <Stack.Screen name="FamousList" component={FamouseListScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </PaperProvider>

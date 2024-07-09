@@ -74,13 +74,13 @@ const HomeScreen = () => {
                         throw new Error('Network response was not ok');
                     }
                     const result = await response.json();
-                    setData(prevData => {
+                    setData(prevData => { //데이터를 가져온후 기존 데이터와 합쳐서 랜더링
                         if (first_index === 0) {
                           remainingFoods = prevData.slice(5, 10);
                           return [...result[0], ...remainingFoods];
                         } else if (first_index === 5) {
                           remainingFoods = prevData.slice(0, 5);
-                          return [...remainingFoods, result[0]];
+                          return [...remainingFoods, ...result[0]];
                         }
                         console.log('remainingFoods:', remainingFoods);
                       });
@@ -122,7 +122,7 @@ const HomeScreen = () => {
                         console.log('remainingFoods:', remainingFoods);
                       });
                     data_len = result[1]; // 두 번째 요소가 데이터 길이
-                    Alert.alert('Success', 'Data successfully sent to server');
+                    // Alert.alert('Success', 'Data successfully sent to server');
                     // setCurrentIndex(0);
             }
             if(data_len == 0 && currentIndex%5 == 0){
@@ -177,6 +177,7 @@ const HomeScreen = () => {
         const tempfunc = async () => {
 
         if (currentIndex === 5) {
+            console.log('가져옴'); 
             if(likeFoods.length === 0){ //만약 좋아요 리스트가 비어있으면(삭제한경우가 있을 수 있으니까) 처음부터 다시시작
                 await fetch_data(0,0);
                 setFeedbackIndex(0);
@@ -184,7 +185,8 @@ const HomeScreen = () => {
                 await fetch_data(feedbackindex+1,0);
                 setFeedbackIndex(prevIndex => prevIndex + 1);
             }
-        }else if(currentIndex === 10){ 
+        }else if(currentIndex === 10){
+            console.log('가져옴'); 
             setCurrentIndex(0); 
             if(likeFoods.length === 0){ //만약 좋아요 리스트가 비어있으면(삭제한경우가 있을 수 있으니까) 처음부터 다시시작
                 await fetch_data(0,5);
@@ -310,7 +312,7 @@ const HomeScreen = () => {
             if (!response.ok) {
                 throw new Error('Failed to reset exclude indices');
             }
-            Alert.alert('Success', 'Exclude indices have been reset');
+            // Alert.alert('Success', 'Exclude indices have been reset');
         } catch (error) {
             console.error('Error resetting exclude indices:', error);
             Alert.alert('Error', `Failed to reset exclude indices: ${error.message}`);

@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, StyleSheet, Image, Dimensions, Modal, TouchableOpacity, Alert } from 'react-native';
-import { Button } from 'react-native-paper';
+import { Button, FAB } from 'react-native-paper';
 import { FlatGrid } from 'react-native-super-grid';
 import { LikeFoodsContext } from '../context/LikeFoodsContext';
 import { useNavigation } from '@react-navigation/native';
@@ -11,11 +11,14 @@ const LikeListScreen = ({ navigation }) => {
     const { likeFoods, setLikeFoods } = useContext(LikeFoodsContext);
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
-    const [fabbutton, setFabbutton] = useState(false);
+    // const [fabbutton, setFabbutton] = useState(false);
+
+    const [fabOpen, setFabOpen] = useState(false);
+    const onStateChange = ({ open }) => setFabOpen(open);
 
     const navigation_to = useNavigation();
 
-    const openModal = (image) => {
+    const openModal = (image) => {//사진 클릭시 모달찰 이용해서 사진확대해서 보여주기
         setSelectedImage(image);
         setModalVisible(true);
     };
@@ -25,7 +28,7 @@ const LikeListScreen = ({ navigation }) => {
         setSelectedImage(null);
     };
 
-    const deleteItem = (name) => {
+    const deleteItem = (name) => { //길게 클릭시 해당 음식을 좋아요 리스트에서 삭제
         Alert.alert(
             "삭제 확인",
             "정말로 이 항목을 삭제하시겠습니까?",
@@ -95,9 +98,25 @@ const LikeListScreen = ({ navigation }) => {
                     </View>
                 </Modal>
             )}
-            {likeFoods.length>0 &&<Button icon="map-marker" mode="contained" onPress={() => navigation_to.navigate('MapApi')} style={styles.locationStyle}>
-                    위치찾기
-            </Button>}
+            {likeFoods.length>0 &&
+                <FAB.Group
+                open={fabOpen}
+                visible
+                icon={fabOpen ? 'close' : 'plus'}
+                actions={[
+                    { icon: 'map', label: '좋아요 목록 지도에서 보기', onPress: () => navigation.navigate('MapApi'), },
+                    { icon: 'weather-sunny', label: '좋아요 목록 맛집리스트', onPress: () => navigation.navigate('FamousList'),  },
+                ]}
+                onStateChange={onStateChange}
+                onPress={() => {
+                    if (fabOpen) {
+                    setFabOpen(false);
+                    }
+                }}
+                style={[styles.fab, fabOpen && styles.fabOpen]}
+                fabStyle={styles.fabButton}
+                />
+           }
         </View>
 
     );
@@ -180,17 +199,22 @@ const styles = StyleSheet.create({
         height: width,
         borderRadius: width / 2,
     },
-
-    locationStyle: {
-        bottom: 16,
-        right: 16,
+    fab: {
         position: 'absolute',
-        justifyContent: 'center',
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-   
+        margin: 0,
       },
+      fabOpen: {
+        height: 'auto',
+        margin: 0,
+      },
+      fabButton: {
+        height: 80,
+        width: 80,
+        alignItems: 'center',
+        justifyContent: 'center',
+        // backgroundColor: '#ccffcc',
+      },
+
 });
 
 export default LikeListScreen;
